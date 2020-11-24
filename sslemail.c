@@ -37,7 +37,7 @@ int RecvPacket(char *buf)
 {
     int len = SSL_READ_SIZE;
     len = SSL_read(ssl, buf, SSL_READ_SIZE);
-    if (len >= 0 )buf[len] = 0; 
+    if (len >= 0) buf[len] = 0; 
     printf("Received: %s\n",buf);
 
     if (len < 0) {

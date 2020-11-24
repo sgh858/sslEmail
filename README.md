@@ -45,7 +45,7 @@ perl -MMIME::Base64 -e 'print encode_base64("\000USER_NAME\000PASSWORD")'
 ```
 2. Install the OpenSSL development package
 ```
-sudo apt install apt-get install libssl-dev
+sudo apt install libssl-dev
 ```
 3. Compile and run the code
 ```
