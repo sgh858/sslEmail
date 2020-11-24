@@ -1,8 +1,10 @@
-//============================================================================
-// Name        : sslemail.c
-// Compiling   : gcc -c -o sslemail.o sslemail.c
-//               gcc -o sslemail sslemail.o -lssl -lcrypto
-//============================================================================
+/*============================================================================
+* Name        : sslemail.c
+* Compiling   : gcc -c -o sslemail.o sslemail.c
+*               gcc -o sslemail sslemail.o -lssl -lcrypto
+*=============================================================================
+*/
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -25,20 +27,17 @@
 #define SSL_PORT 465         // Destination port for SSL connection
 #define PUTTY_CMD "~/putty/unix/putty -load Save_session" //putty command to load saved session
 #define HELLO_SERVER "helo EMAILSERVER\n" // Handsake command to email server
-#define AUTH_PLAIN "auth plain plain_user_password_in_base64_encoding\n" //Email user name and password in base64 encode
-                             // Uses perl to create the base64 encode for USER_NAME/PASSWORD 
-                             // perl -MMIME::Base64 -e 'print encode_base64("\000USER_NAME\000PASSWORD")'
-                             // Don't remove the \000 in the perl command
+#define AUTH_PLAIN "auth plain plain_user_password_in_base64_encoding\n" // Email user name and password in base64 encode
 
 SSL *ssl;  //SSL socket
 int sock;  //SSL socket reference
 
 // To receive data from SSL connection and store in buffer buf
-int RecvPacket(char* buf)
+int RecvPacket(char *buf)
 {
     int len=SSL_READ_SIZE;
     len=SSL_read(ssl, buf, SSL_READ_SIZE);
-    if (len >= 0 )buf[len]=0; 
+    if (len >= 0 )buf[len] = 0; 
     printf("Received: %s\n",buf);
 
     if (len < 0) {
@@ -76,8 +75,9 @@ int SendPacket(const char *buf)
 }
     
 // Connect to the destination using SSL
-int connectSSL(){
-    int s, err=0;
+int connectSSL()
+{
+    int s, err = 0;
 
     s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0) {
@@ -131,7 +131,8 @@ void log_ssl()
 }
 
 // Get today date and return the string in "dd Mmm yyyy" format (e.g 11 Jan 2021)
-int getToday(char* strDate){
+int getToday(char *strDate)
+{
     time_t t;
     struct tm *tmp;
 
@@ -151,14 +152,15 @@ int getToday(char* strDate){
 }
 
 // Check if today is holiday (Sat, Sun or Public holiday)
-int isHoliday(){
+int isHoliday()
+{
     char arrHoliday [][STRINGDATE_SIZE] = { // Public holiday to Apr 2021 only
-                         {"25 Dec 2020"},  
-                         {"01 Jan 2021"},
-                         {"12 Feb 2021"},
-                         {"15 Feb 2021"},   
-                         {"02 Apr 2021"}
-                     };    
+                                            {"25 Dec 2020"},  
+                                            {"01 Jan 2021"},
+                                            {"12 Feb 2021"},
+                                            {"15 Feb 2021"},   
+                                            {"02 Apr 2021"}
+                                          };    
     time_t t;
     struct tm *tmp;
     char strDate[STRINGDATE_SIZE];
@@ -173,8 +175,8 @@ int isHoliday(){
         return 1; // Is holiday - weekend
 
     int err = getToday(strDate);
-    for (int i =0; i < sizeof(arrHoliday)/STRINGDATE_SIZE; i++) {
-        if (strcmp(strDate, arrHoliday[i])==0) 
+    for (int i = 0; i < sizeof(arrHoliday)/STRINGDATE_SIZE; i++) {
+        if (strcmp(strDate, arrHoliday[i]) == 0) 
             return 1; // Is holiday - public holiday
     }
 
@@ -182,9 +184,10 @@ int isHoliday(){
 }
 
 // Create email content to buf, depends on option
-void createEmail(int option, char* buf){
+void createEmail(int option, char *buf)
+{
     char strDate[STRINGDATE_SIZE];
-    int err =0;
+    int err = 0;
 
     err = getToday(strDate);
 
@@ -193,23 +196,22 @@ void createEmail(int option, char* buf){
     "To: XXX YYY <xxx@xxx.xxx>, YYY ZZZ <xxx@xxx.xxx>\n" \
     "CC: zzz@xxx.xxx\n");
 
-    if (option == WORK_START){
+    if (option == WORK_START) {
         strcat(buf, "Subject: Test start today: ");
         strcat(buf, strDate);
         strcat(buf, " - End\n");
         strcat(buf, "\n" \
-        "Test start line 1\n" \
-        "Test start line 2\n" \
-        "\n");
-    } else 
-    if (option == WORK_STOP) {
+                    "Test start line 1\n" \
+                    "Test start line 2\n" \
+                    "\n");
+    } else if (option == WORK_STOP) {
         strcat(buf, "Subject: Test stop today: ");
         strcat(buf, strDate);
         strcat(buf, " - End\n");
         strcat(buf, "\n" \
-        "Test stop line 1\n" \
-        "Test stop line 2\n" \
-        "\n");
+                    "Test stop line 1\n" \
+                    "Test stop line 2\n" \
+                    "\n");
     }  //else  invalid option
 
     strcat(buf, "Regards,\n" \
@@ -219,8 +221,9 @@ void createEmail(int option, char* buf){
 }
 
 // Send email start work/stop work depend on option
-int sendEmail(int option){
-    int err=0;
+int sendEmail(int option)
+{
+    int err = 0;
     char buf[100000];
 
     // Send helo
@@ -256,7 +259,8 @@ int sendEmail(int option){
 } 
 
 // Check for need to send email, which type of email (start/stop) or stop whole program
-int checkToSendEmail(int* secondToWait){
+int checkToSendEmail(int *secondToWait)
+{
     time_t apr12021, today842am, today11am, today615pm, today9pm, currenttime;
     struct tm *tmp;
     int ranMin;
@@ -267,16 +271,16 @@ int checkToSendEmail(int* secondToWait){
     currenttime = time(NULL);
     tmp = localtime(&currenttime); 
    
-    tmp->tm_sec=0; tmp->tm_min=42; tmp->tm_hour=8;
+    tmp->tm_sec = 0; tmp->tm_min = 42; tmp->tm_hour = 8;
     today842am = mktime(tmp);
 
-    tmp->tm_sec=0; tmp->tm_min=0; tmp->tm_hour=11;
+    tmp->tm_sec = 0; tmp->tm_min = 0; tmp->tm_hour = 11;
     today11am = mktime(tmp);
 
-    tmp->tm_sec=0; tmp->tm_min=15; tmp->tm_hour=18;
+    tmp->tm_sec = 0; tmp->tm_min = 15; tmp->tm_hour = 18;
     today615pm = mktime(tmp);
 
-    tmp->tm_sec=0; tmp->tm_min=0; tmp->tm_hour=21;
+    tmp->tm_sec = 0; tmp->tm_min = 0; tmp->tm_hour = 21;
     today9pm = mktime(tmp);
 
     strptime("01 Apr 2021 00:00:00", "%d %b %Y %H:%M:%S",tmp);
@@ -289,33 +293,34 @@ int checkToSendEmail(int* secondToWait){
             //skip to next morning
             *secondToWait = difftime(today842am + 60*60*24, currenttime) + ranMin*60;
             return NO_WORK; // No need to send email now, just wait next day
-        } else // Need to send email start work email
-        if (difftime(currenttime, today842am)>= 0 && difftime(currenttime, today11am) <= 0) {
+        } else if (difftime(currenttime, today842am) >= 0 && difftime(currenttime, today11am) <= 0) {
+            // Need to send email start work email
             *secondToWait = difftime(today615pm, currenttime) + ranMin*60; // To the afternoon 6:15pm
             return WORK_START; // Need to send start work email
-        } else // Need to send stop email
-        if (difftime(currenttime, today615pm)>= 0 && difftime(currenttime, today9pm)<= 0) {
+        } else if (difftime(currenttime, today615pm) >= 0 && difftime(currenttime, today9pm) <= 0) {
+            // Need to send stop email
             *secondToWait = difftime(today842am + 60*60*24, currenttime) + ranMin*60; // To the next morning 8:42am
             return WORK_STOP; // Need to send stop work email
-        } else // Need to wait to 842am and send email
-        if (difftime(currenttime, today842am)< 0) {
+        } else if (difftime(currenttime, today842am) < 0) {
+            // Need to wait to 842am and send email
             *secondToWait = difftime(today842am, currenttime) + ranMin*60; // Wait to the 842am
             return JUST_WAIT; // Just wait to 842am
-        } else // Need to wait to 615pm and send email
-        if (difftime(currenttime, today615pm)< 0) {                
+        } else if (difftime(currenttime, today615pm) < 0) {                
+            // Need to wait to 615pm and send email
             *secondToWait = difftime(today615pm, currenttime) + ranMin*60; // Wait to 615pm
             return JUST_WAIT; // Just wait to 615pm
-        } else // Need to wait to 842am tomorrow and send email
-        {                
+        } else {
+            // Need to wait to 842am tomorrow and send email
             *secondToWait = difftime(today842am + 60*60*24, currenttime) + ranMin*60; // To the next morning 8:42am
             return JUST_WAIT; // Just wait to 615pm
         }
     }
 }
 
-void killPutty(int pid){
+void killPutty(int pid)
+{
     char pidStr[1024];
-    if (pid >0) 
+    if (pid > 0) 
         sprintf(pidStr, "pkill -f putty; kill -9 %d", pid);
     else
         sprintf(pidStr, "pkill -f putty");
@@ -327,18 +332,18 @@ void killPutty(int pid){
 
 int main(int argc, char *argv[])
 {
-    int err=0, emailOption = -1;;
+    int err = 0, emailOption = -1;;
 
     char buf[100000];
     char pidStr[1024];
-    pid_t childpid=-1;
+    pid_t childpid = -1;
     int stop = 0, secondToWait = 0;
 
-    while (!stop){
+    while (!stop) {
         emailOption = checkToSendEmail(&secondToWait);
         switch (emailOption) {
             case HALT_ALL:  // Stop main and child processes, exit program
-                stop =1;
+                stop = 1;
                 break;
             case NO_WORK:  // Holiday, no need to send email
                 printf ("Today is off day, wait for %d seconds for tomorrow morning.\n", secondToWait);
@@ -347,7 +352,7 @@ int main(int argc, char *argv[])
             case WORK_START:  // Need to send start work email, sleep until afternoon
             case WORK_STOP:  // Need to send stop work email, sleep until next day morning                
                 printf ("Send start/stop work email and wait for %d seconds to send next email.\n", secondToWait);                
-                childpid =fork();
+                childpid = fork();
                 if (childpid == 0) { 
                     // Child process code run here
                     printf("Hello from Child!\n");
@@ -355,9 +360,7 @@ int main(int argc, char *argv[])
                     fgets(pidStr,1024,cmd);  // Start process putty
                     pclose(cmd);
                     return EXIT_SUCCESS;
-                }    
-                else 
-                {
+                } else {
                     // Parent process code run here
                     sleep(5); //Wait 5 secs for child process to run putty
                     printf("Hello from Parent, childpid is %d!\n", childpid); 
