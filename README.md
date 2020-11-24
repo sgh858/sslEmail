@@ -38,6 +38,11 @@ Setup the saved putty session to SSH server. Make sure the putty session had tun
 #define HELLO_SERVER "helo EMAILSERVER\n" // Handsake command to email server
 #define AUTH_PLAIN "auth plain plain_user_password_in_base64_encoding\n" //Email user name and password in base64 encode
 ```
+To get the plain text for user_password_base64_encoding, please use the perl command:
+```
+perl -MMIME::Base64 -e 'print encode_base64("\000USER_NAME\000PASSWORD")'
+\\ Don't remove \000
+```
 2. Install the OpenSSL development package
 ```
 sudo apt install apt-get install libssl-dev
@@ -78,11 +83,6 @@ SGH858
 .  // This final single dot is the must for email server to send email
 Expected reply: 354 End data with <CR><LF>.<CR><LF>
                 250 2.0.0 Ok: queued as 1264725ACF7
-```
-To get the plain text for user_password_base64_encoding, please use the perl command:
-```
-perl -MMIME::Base64 -e 'print encode_base64("\000USER_NAME\000PASSWORD")'
-\\ Don't remove \000
 ```
 This repo is released under The GPL Licenses
 
