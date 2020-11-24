@@ -35,8 +35,8 @@ int sock;  //SSL socket reference
 // To receive data from SSL connection and store in buffer buf
 int RecvPacket(char *buf)
 {
-    int len=SSL_READ_SIZE;
-    len=SSL_read(ssl, buf, SSL_READ_SIZE);
+    int len = SSL_READ_SIZE;
+    len = SSL_read(ssl, buf, SSL_READ_SIZE);
     if (len >= 0 )buf[len] = 0; 
     printf("Received: %s\n",buf);
 
@@ -72,6 +72,7 @@ int SendPacket(const char *buf)
             return EXIT_FAILURE;
         }
     }
+    return EXIT_SUCCESS;
 }
     
 // Connect to the destination using SSL
@@ -287,32 +288,32 @@ int checkToSendEmail(int *secondToWait)
     apr12021 = mktime(tmp);
 
     if (difftime(currenttime, apr12021) > 0) {
-        return HALT_ALL; // No need to send anymore email, the program can exit
+        return HALT_ALL; // No need to send email anymore, the program can exit
     } else {
         if (isHoliday()) {
             //skip to next morning
             *secondToWait = difftime(today842am + 60*60*24, currenttime) + ranMin*60;
             return NO_WORK; // No need to send email now, just wait next day
         } else if (difftime(currenttime, today842am) >= 0 && difftime(currenttime, today11am) <= 0) {
-            // Need to send email start work email
+            // Need to send start work email
             *secondToWait = difftime(today615pm, currenttime) + ranMin*60; // To the afternoon 6:15pm
-            return WORK_START; // Need to send start work email
+            return WORK_START; 
         } else if (difftime(currenttime, today615pm) >= 0 && difftime(currenttime, today9pm) <= 0) {
             // Need to send stop email
             *secondToWait = difftime(today842am + 60*60*24, currenttime) + ranMin*60; // To the next morning 8:42am
-            return WORK_STOP; // Need to send stop work email
+            return WORK_STOP; 
         } else if (difftime(currenttime, today842am) < 0) {
             // Need to wait to 842am and send email
             *secondToWait = difftime(today842am, currenttime) + ranMin*60; // Wait to the 842am
-            return JUST_WAIT; // Just wait to 842am
+            return JUST_WAIT; 
         } else if (difftime(currenttime, today615pm) < 0) {                
             // Need to wait to 615pm and send email
             *secondToWait = difftime(today615pm, currenttime) + ranMin*60; // Wait to 615pm
-            return JUST_WAIT; // Just wait to 615pm
+            return JUST_WAIT; 
         } else {
             // Need to wait to 842am tomorrow and send email
             *secondToWait = difftime(today842am + 60*60*24, currenttime) + ranMin*60; // To the next morning 8:42am
-            return JUST_WAIT; // Just wait to 615pm
+            return JUST_WAIT;
         }
     }
 }
@@ -332,7 +333,7 @@ void killPutty(int pid)
 
 int main(int argc, char *argv[])
 {
-    int err = 0, emailOption = -1;;
+    int err = 0, emailOption = -1;
 
     char buf[100000];
     char pidStr[1024];

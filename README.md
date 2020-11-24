@@ -86,4 +86,5 @@ Expected reply: 354 End data with <CR><LF>.<CR><LF>
 ```
 This repo is released under The GPL Licenses
 
-### Acknowledgment: The SSL connection code is developed from https://stackoverflow.com/questions/41229601/openssl-in-c-socket-connection-https-client
+### Acknowledgment
+The SSL connection code is developed from https://stackoverflow.com/questions/41229601/openssl-in-c-socket-connection-https-client
