@@ -33,12 +33,12 @@ SSL *ssl;  //SSL socket
 int sock;  //SSL socket reference
 
 // To receive data from SSL connection and store in buffer buf
-int RecvPacket(char *buf)
+int recvPacket(char *buf)
 {
     int len = SSL_READ_SIZE;
     len = SSL_read(ssl, buf, SSL_READ_SIZE);
     if (len >= 0) buf[len] = 0; 
-    printf("Received: %s\n",buf);
+    printf("Received: %s\n", buf);
 
     if (len < 0) {
         int err = SSL_get_error(ssl, len);
@@ -53,7 +53,7 @@ int RecvPacket(char *buf)
 }
 
 // To send data to the SSL connection from buffer buf
-int SendPacket(const char *buf)
+int sendPacket(const char *buf)
 {
     int len = SSL_write(ssl, buf, strlen(buf));
     printf("Sent: %s\n", buf);
@@ -103,7 +103,7 @@ int connectSSL()
     ssl = SSL_new (ctx);
     if (!ssl) {
         printf("Error creating SSL.\n");
-        log_ssl();
+        logSSL();
         return EXIT_FAILURE;
     }
     sock = SSL_get_fd(ssl);
@@ -111,7 +111,7 @@ int connectSSL()
     err = SSL_connect(ssl);
     if (err <= 0) {
         printf("Error creating SSL connection.  err=%x\n", err);
-        log_ssl();
+        logSSL();
         fflush(stdout);
         return EXIT_FAILURE;
     }
@@ -119,7 +119,7 @@ int connectSSL()
     return EXIT_SUCCESS;    
 }
 
-void log_ssl()
+void logSSL()
 {
     int err;
     while (err = ERR_get_error()) {
@@ -229,31 +229,31 @@ int sendEmail(int option)
 
     // Send helo
     char request[10000] = HELLO_SERVER;       
-    SendPacket(request);
-    err = RecvPacket(buf);
+    sendPacket(request);
+    err = recvPacket(buf);
 
     // Send authentication
     strcpy(request, AUTH_PLAIN);
-    SendPacket(request);
-    err = RecvPacket(buf);
+    sendPacket(request);
+    err = recvPacket(buf);
 
     // From real email user, changed it to your email
     strcpy(request, "mail from: fromuser@xxx.xxx.xxx\n"); 
-    SendPacket(request);
-    err = RecvPacket(buf);
+    sendPacket(request);
+    err = recvPacket(buf);
 
-    strcpy(request, "rcpt to:  recipient1@xxx.xxx\n");    // To this real recepient 
-    SendPacket(request);
-    err = RecvPacket(buf);
+    strcpy(request, "rcpt to:  recipient1@xxx.xxx\n");    // To this real recipient 
+    sendPacket(request);
+    err = recvPacket(buf);
 
-    strcpy(request, "rcpt to:  recipient2@xxx.xxx\n");    // To additional recepient
-    SendPacket(request);
-    err = RecvPacket(buf);
+    strcpy(request, "rcpt to:  recipient2@xxx.xxx\n");    // To additional recipient
+    sendPacket(request);
+    err = recvPacket(buf);
 
     createEmail(option, request);
 
-    SendPacket(request);
-    err = RecvPacket(buf);
+    sendPacket(request);
+    err = recvPacket(buf);
 
     if (!err) printf("Email sent!\n");    
     return err;    
@@ -293,7 +293,7 @@ int checkToSendEmail(int *secondToWait)
         if (isHoliday()) {
             //skip to next morning
             *secondToWait = difftime(today842am + 60*60*24, currenttime) + ranMin*60;
-            return NO_WORK; // No need to send email now, just wait next day
+            return NO_WORK; 
         } else if (difftime(currenttime, today842am) >= 0 && difftime(currenttime, today11am) <= 0) {
             // Need to send start work email
             *secondToWait = difftime(today615pm, currenttime) + ranMin*60; // To the afternoon 6:15pm
@@ -325,8 +325,8 @@ void killPutty(int pid)
         sprintf(pidStr, "pkill -f putty; kill -9 %d", pid);
     else
         sprintf(pidStr, "pkill -f putty");
-    FILE *cmd = popen(pidStr,"r");
-    fgets(pidStr,1024,cmd);  // Kill all process with name putty and child process
+    FILE *cmd = popen(pidStr, "r");
+    fgets(pidStr, 1024, cmd);  // Kill all process with name putty and child process
     pclose(cmd);
     sleep(5); // Let wait 5 sec for child process to be killed
 }
@@ -357,8 +357,8 @@ int main(int argc, char *argv[])
                 if (childpid == 0) { 
                     // Child process code run here
                     printf("Hello from Child!\n");
-                    FILE *cmd = popen(PUTTY_CMD,"r");
-                    fgets(pidStr,1024,cmd);  // Start process putty
+                    FILE *cmd = popen(PUTTY_CMD, "r");
+                    fgets(pidStr, 1024, cmd);  // Start process putty
                     pclose(cmd);
                     return EXIT_SUCCESS;
                 } else {
@@ -366,13 +366,13 @@ int main(int argc, char *argv[])
                     sleep(5); //Wait 5 secs for child process to run putty
                     printf("Hello from Parent, childpid is %d!\n", childpid); 
                     err = connectSSL();                    
-                    if (err) {
-                        secondToWait = 300;  // Problem with SSL connection, wait 5mins to try again
-                        printf ("Error in sending email, waiting for 5 mins to try again.\n");
-                    } else {
-                        RecvPacket(buf);        
+                    if (!err) {
+                        recvPacket(buf);        
                         sendEmail(emailOption);
                         sleep(5); //Wait 5 secs for email sent
+                    } else {
+                        secondToWait = 300;  // Problem with SSL connection, wait 5mins to try again
+                        printf ("Error in sending email, waiting for 5 mins to try again.\n");
                     }
                     killPutty(childpid);  // Kill child process and putty
                     wait(2);

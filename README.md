@@ -1,7 +1,7 @@
 ## OpenSSL Email over ssh Tunnels in Linux/Ubuntu
 This small tool (sslemail) allows you to send email over SSL tunnels of ssh connection to email server (using SSL connection). I use putty to connect and setup tunnels to my work place SSH server/Email server. You can use any program that can do that job too.
 
-Once putty is installed and setup properly. This sslemail tool will open a child process to run putty and setup tunnel to email server. The main process will open a ssl connection to email server through that tunnel. It then sends whatever email needed, closes all the connections (ssl connection to email server, putty tunnels, child process) and wait for the next opportunity to send email. 
+Once putty is installed and setup properly. This sslemail tool will open a child process to run putty and setup tunnel to email server. The main process will open a ssl connection to email server through that tunnel. It then sends whatever email needed, closes all the connections (ssl connection to email server, putty tunnels, child process), sleeps for a period of time wake up to send email again. 
 
 Currently the sslemail tool will send 2 emails (1 in the morning 942am-11am, 1 in the evening 615pm-9pm) on the working days only. The program will exit automatically after 31 March 2021.
 
@@ -27,7 +27,7 @@ make
 ```
 The putty binary is placed in the ./putty/unix directory
 ### Step 2: Set up putty
-Setup the saved putty session to SSH server. Make sure the putty session had tunnel to email server.
+Setup the saved putty session to SSH server. Make sure the putty session has tunnel to email server.
 
 ### Step 3: Compile the sslemail tool
 1. Change the following in the code to your own parameters
@@ -52,16 +52,16 @@ sudo apt install libssl-dev
 ./csslemail.sh 
 ```
 ### Notes
-In the program, this tool uses the following SMTP commands to communicate with the email server:
+The program uses the following SMTP commands to communicate with the email server:
 ```
 Sent: 
-helo MAILSERVER
+helo MAILSERVER // Change to your email server 
 Expected reply: 250 MAILSERVERxxx.xxx.xxx.xxx
 Sent: 
-auth plain user_password_base64_encoding
+auth plain user_password_base64_encoding // Change to your username/password
 Expected reply: 235 2.7.0 Authentication successful
 Sent: 
-mail from: fromuser@xxx.xxx.xxx
+mail from: fromuser@xxx.xxx.xxx //Change to your email address 
 Expected reply: 250 2.1.0 Ok
 Sent: 
 rcpt to:  recipient1@xxx.xxx // This is the real recipient
