@@ -25,8 +25,8 @@
 
 #define SSL_HOST "SSL host name/address" // Destination host for SSL connection
 #define SSL_PORT 465         // Destination port for SSL connection
-#define PUTTY_CMD "~/putty/unix/putty -load Save_session" //putty command to load saved session
-#define HELLO_SERVER "helo EMAILSERVER\n" // Handsake command to email server
+#define PUTTY_CMD "~/putty/unix/putty -load saved_session" //putty command to load saved session
+#define HELLO_SERVER "helo MAILSERVER\n" // Handsake command to email server
 #define AUTH_PLAIN "auth plain plain_user_password_in_base64_encoding\n" // Email user name and password in base64 encode
 
 SSL *ssl;  //SSL socket
@@ -172,7 +172,7 @@ int isHoliday()
         perror("localtime");
         return EXIT_FAILURE;
     }
-    if (tmp->tm_wday == 0 || tmp->tm_wday == 7) 
+    if (tmp->tm_wday == 0 || tmp->tm_wday == 6) 
         return 1; // Is holiday - weekend
 
     int err = getToday(strDate);
@@ -194,8 +194,8 @@ void createEmail(int option, char *buf)
 
     // Email header, for show only, real sender and recipeints are already set
     strcpy(buf, "Data\nFrom: \"ABC XYZ\" <youremail@xxx.xxx>\n" \
-    "To: XXX YYY <xxx@xxx.xxx>, YYY ZZZ <xxx@xxx.xxx>\n" \
-    "CC: zzz@xxx.xxx\n");
+                "To: XXX YYY <xxx@xxx.xxx>, YYY ZZZ <xxx@xxx.xxx>\n" \
+                "CC: zzz@xxx.xxx\n");
 
     if (option == WORK_START) {
         strcat(buf, "Subject: Test start today: ");
